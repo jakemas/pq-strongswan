@@ -4,7 +4,7 @@ ENV VERSION="6.0dr2"
 
 RUN \
   # install packages
-  DEV_PACKAGES="wget unzip make gcc libssl-dev cmake ninja-build" && \
+  DEV_PACKAGES="wget unzip make gcc libssl-dev cmake ninja-build libgmp3-dev" && \
   apt-get -y update && \
   apt-get -y install iproute2 iputils-ping nano $DEV_PACKAGES && \
   \

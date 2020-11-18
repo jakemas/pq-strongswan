@@ -2,7 +2,7 @@ version: "3"
 
 services:
   moon:
-    image: jakemas/pq-strongswan:6.0dr2
+    image: pq-strongswan:6.0dr2
     container_name: moon
     cap_add:
       - NET_ADMIN
@@ -12,14 +12,13 @@ services:
     tty: true
     volumes:
       - ./moon:/etc/
-      - ./strongswan.conf:/etc/strongswan.conf
     networks:
       internet:
          ipv4_address: 192.168.0.2
       intranet:
          ipv4_address: 10.1.0.2
   carol:
-    image: jakemas/pq-strongswan:6.0dr2
+    image: pq-strongswan:6.0dr2
     container_name: carol
     depends_on:
       - moon
@@ -31,7 +30,6 @@ services:
     tty: true
     volumes:
       - ./carol:/etc/
-      - ./strongswan.conf:/etc/strongswan.conf
     networks:
       internet:
          ipv4_address: 192.168.0.3
@@ -39,11 +37,11 @@ services:
 networks:
   internet:
     ipam:
-      driver: default 
+      driver: default
       config:
         - subnet: 192.168.0.0/24
   intranet:
      ipam:
         driver: default
         config:
-          - subnet: 10.1.0.0/16 
+          - subnet: 10.1.0.0/16
