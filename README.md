@@ -7,7 +7,7 @@ Docker Image for testing pq-strongswan
 
 We clone the strongSwan `docker-compose` environment which automatically installs the `strongx509/pq-strongswan` docker image and brings the `moon` and `carol` docker containers up:
 ```console
-$ git clone https://github.com/jakemas/pq-strongswan-test.git
+$ git clone https://github.com/jakemas/pq-strongswan.git
 $ cd docker/pq-strongswan
 $ sh scripts/gen_dirs.sh
 $ docker-compose up
