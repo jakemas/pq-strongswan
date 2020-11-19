@@ -15,7 +15,7 @@ services:
     networks:
       internet:
          ipv4_address: 192.168.0.2
-      intranet_moon:
+      intranet:
          ipv4_address: 10.1.0.2
   carol:
     image: pq-strongswan:6.0dr2
@@ -33,8 +33,6 @@ services:
     networks:
       internet:
          ipv4_address: 192.168.0.3
-      intranet_carol:
-         ipv4_address: 10.3.0.1
 
 networks:
   internet:
@@ -42,13 +40,8 @@ networks:
       driver: default
       config:
         - subnet: 192.168.0.0/24
-  intranet_moon:
+  intranet:
      ipam:
         driver: default
         config:
           - subnet: 10.1.0.0/16
-  intranet_carol:
-     ipam:
-        driver: default
-        config:
-          - subnet: 10.3.0.0/16
