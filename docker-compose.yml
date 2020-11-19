@@ -33,8 +33,6 @@ services:
     networks:
       internet:
          ipv4_address: 192.168.0.3
-      intranet:
-         ipv4_address: 10.3.0.1
 
 networks:
   internet:
@@ -47,8 +45,3 @@ networks:
         driver: default
         config:
           - subnet: 10.1.0.0/16
-    intranet:
-     ipam:
-        driver: default
-        config:
-          - subnet: 10.3.0.0/16
