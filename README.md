@@ -7,8 +7,10 @@ Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Do
 
 ## Branches
 There are two branches in this repo, they both represent different network architecture:
-- The `main` branch represents a Road Warrior - VPN gateway connection. Road Warriors are remote users who want to connect to a network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
 - The `site-to-site` branch represents a site-to-site VPN connection. A site-to-site VPN is a connection between two or more networks, such as a corporate network and a branch office network. 
+- The `road-warrior` branch represents a Road Warrior - VPN gateway connection. Road Warriors are remote users who want to connect to a network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
+
+There is more detail in this readme about the particular network configuration of the branch.
 
 [STRONGSWAN]: https://www.strongswan.org
 [IKEV2_MULTIPLE_KE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-multiple-ke
