@@ -5,9 +5,14 @@ Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Do
 * [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE]: Multiple Key Exchanges in IKEv2
 * [draft-ietf-ipsecme-ikev2-intermediate][IKEV2_INTERMEDIATE]: Intermediate Exchange in the IKEv2 Protocol
 
+
+This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
+
 [STRONGSWAN]: https://www.strongswan.org
 [IKEV2_MULTIPLE_KE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-multiple-ke
 [IKEV2_INTERMEDIATE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-intermediate
+[PQ-STRONGSWAN]:https://github.com/strongX509/docker/tree/master/pq-strongswan
+[RW-NTRU-PSK]:https://github.com/strongswan/strongswan/tree/master/testing/tests/ikev2/rw-ntru-psk
 
 ## Prerequisites <a name="section0"></a>
 
@@ -130,14 +135,6 @@ charon {
    send_vendor_id = yes
    fragment_size = 1480
    max_packet = 30000
-}
-
-
-swanctl {
-  load = pem pkcs1 x509 revocation constraints pubkey openssl random
-}
-charon-systemd {
-  load = random nonce aes sha1 sha2 hmac pem pkcs1 x509 revocation curve25519  curl kernel-netlink socket-default updown v>
 }
 ```
 ### NIST Round 3 Submission KEM Candidates
