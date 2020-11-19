@@ -5,8 +5,10 @@ Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Do
 * [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE]: Multiple Key Exchanges in IKEv2
 * [draft-ietf-ipsecme-ikev2-intermediate][IKEV2_INTERMEDIATE]: Intermediate Exchange in the IKEv2 Protocol
 
-
-This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
+## Branches
+There are two branches in this repo, they both represent different network architecture:
+- The `main` branch represents a Road Warrior - VPN gateway connection. Road Warriors are remote users who want to connect to a network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
+- The `site-to-site` branch represents a site-to-site VPN connection. A site-to-site VPN is a connection between two or more networks, such as a corporate network and a branch office network. 
 
 [STRONGSWAN]: https://www.strongswan.org
 [IKEV2_MULTIPLE_KE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-multiple-ke
