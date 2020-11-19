@@ -121,7 +121,7 @@ The network topology that has been created looks as follows:
 ```
                +-------+                        +--------+
   10.3.0.1 --- | carol | === 192.168.0.0/24 === |  moon  | --- 10.1.0.2
- Virtual IP .1 +-------+ .3     Internet     .2 +--------+ .2  Virtual IP
+ Virtual IP .3 +-------+ .3     Internet     .2 +--------+ .2  Virtual IP
 ```
 
 VPN client `carol` and VPN gateway `moon` are connected with each other via the `192.168.0.0/24` network emulating the `Internet`. Within the IPsec tunnel `carol` is going to use the virtual IP address `10.3.0.1` that will be assigned to the client by the gateway via the IKEv2 protocol.
