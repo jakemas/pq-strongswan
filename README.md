@@ -5,8 +5,12 @@ Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Do
 * [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE]: Multiple Key Exchanges in IKEv2
 * [draft-ietf-ipsecme-ikev2-intermediate][IKEV2_INTERMEDIATE]: Intermediate Exchange in the IKEv2 Protocol
 
+## Branches
+There are two branches in this repo, they both represent different network architecture:
+- The `site-to-site` branch represents a site-to-site VPN connection. A site-to-site VPN is a connection between two or more networks, such as a corporate network and a branch office network. 
+- The `road-warrior` branch represents a Road Warrior - VPN gateway connection. Road Warriors are remote users who want to connect to a network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
 
-This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
+There is more detail in this readme about the particular network configuration of the branch.
 
 [STRONGSWAN]: https://www.strongswan.org
 [IKEV2_MULTIPLE_KE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-multiple-ke
@@ -116,11 +120,11 @@ As we will have multiple terminal windows open for each client, we shall refer t
 The network topology that has been created looks as follows:
 ```
                +-------+                        +--------+
-  10.3.0.1 --- | carol | === 192.168.0.0/24 === |  moon  | --- 10.1.0.0/16
- Virtual IP    +-------+ .3     Internet     .2 +--------+ .2    Intranet
+  10.3.0.1 --- | carol | === 192.168.0.0/24 === |  moon  | --- 10.1.0.2
+ Virtual IP .1 +-------+ .3     Internet     .2 +--------+ .2  Virtual IP
 ```
 
-VPN client `carol` and VPN gateway `moon` are connected with each other via the `192.168.0.0/24` network emulating the `Internet`. Behind `moon` there is an additional `10.1.0.0/16` network acting as an `Intranet`. Within the IPsec tunnel `carol` is going to use the virtual IP address `10.3.0.1` that will be assigned to the client by the gateway via the IKEv2 protocol.
+VPN client `carol` and VPN gateway `moon` are connected with each other via the `192.168.0.0/24` network emulating the `Internet`. Within the IPsec tunnel `carol` is going to use the virtual IP address `10.3.0.1` that will be assigned to the client by the gateway via the IKEv2 protocol.
 
 ## strongSwan Configuration <a name="section2"></a>
 
@@ -179,8 +183,8 @@ conn %default
 
 conn Tunnel1
         left=192.168.0.3
-        leftsourceip=%config
-        leftid=carol@strongswan.org
+        leftid=carol.strongswan.org
+        leftsubnet=10.3.0.1/16
         leftfirewall=yes
         right=192.168.0.2
         rightsubnet=10.1.0.0/16
@@ -207,13 +211,14 @@ conn %default
         esp=aes256gcm16-sha512-x25519-ke1_kyber3
         authby=psk
 
-conn rw
+conn Tunnel1
         left=192.168.0.2
         leftsubnet=10.1.0.0/16
         leftid=moon.strongswan.org
         leftfirewall=yes
-        right=%any
-        rightsourceip=10.3.0.0/16
+        right=192.168.0.3
+        rightsubnet=10.3.0.0/16
+        rightid=carol.strongswan.org
         auto=add
 ```
 
@@ -277,8 +282,8 @@ Listening IP addresses:
   192.168.0.3
 Connections:
      Tunnel1:  192.168.0.3...192.168.0.2  IKEv2
-     Tunnel1:   local:  [192.168.0.3] uses pre-shared key authentication
-     Tunnel1:   remote: [192.168.0.2] uses pre-shared key authentication
+     Tunnel1:   local:  [carol.strongswan.org] uses pre-shared key authentication
+     Tunnel1:   remote: [moon.strongswan.org] uses pre-shared key authentication
      Tunnel1:   child:  10.3.0.0/16 === 10.1.0.0/16 TUNNEL
 Security Associations (0 up, 0 connecting):
   none
@@ -291,10 +296,10 @@ Tunnel1: IKEv2, reauthentication every 3420s, no rekeying
   local:  192.168.0.3
   remote: 192.168.0.2
   local pre-shared key authentication:
-    id: 192.168.0.3
+    id: carol.strongswan.org
   remote pre-shared key authentication:
-    id: 192.168.0.2
-  Tunnel1: TUNNEL, rekeying every 1020s
+    id: moon.strongswan.org
+  net-net: TUNNEL, rekeying every 1020s
     local:  10.3.0.0/16
     remote: 10.1.0.0/16
 ```
@@ -380,7 +385,7 @@ Now let's have a look at the established tunnel connections:
 ```console
 $carol# swanctl --list-sas
 Tunnel1: #1, ESTABLISHED, IKEv2, 739acec0ff8f1f84_i* 5de2e8d07fa3cec2_r
-  local  'carol@strongswan.org' @ 192.168.0.3[4500] [10.3.0.1]
+  local  'carol@strongswan.org' @ 192.168.0.3[4500]
   remote 'moon.strongswan.org' @ 192.168.0.2[4500]
   AES_GCM_16-256/PRF_HMAC_SHA2_512/CURVE_25519/KE1_KYBER_L3
   established 446s ago, reauth in 2669s
