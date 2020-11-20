@@ -173,7 +173,7 @@ config setup
 
 conn %default
         ikelifetime=60m
-        keylife=20m
+        lifetime=20m
         rekeymargin=3m
         keyingtries=1
         keyexchange=ikev2
@@ -192,7 +192,7 @@ conn Tunnel1
         auto=add
 ```
 
-The child security association `Tunnel1` is defined. It connects the client with the outer IP address of the gateway.
+The child security association `Tunnel1` is defined. It connects the client with the IP address of the gateway `192.168.0.2`.
 
 ### VPN Gateway Configuration
 
@@ -203,7 +203,7 @@ config setup
 
 conn %default
         ikelifetime=60m
-        keylife=20m
+        lifetime=20m
         rekeymargin=3m
         keyingtries=1
         keyexchange=ikev2
@@ -226,7 +226,7 @@ conn Tunnel1
 
 ### On VPN Gateway "moon"
 
-In an additional console window we open a `bash` shell to start and manage the strongSwan daemon in the `moon` container:
+In an additional console window we refer to as `terminal-moon` we open a `bash` shell to start and manage the strongSwan daemon in the `moon` container:
 
 ```console
 $ docker exec -ti moon /bin/bash
@@ -247,7 +247,7 @@ moon     |
 
 ### On VPN Client "carol"
 
-In an additional console window we open a `bash` shell to start and manage the strongSwan daemon in the `carol` container:
+In an additional console window we refer to as `terminal-carol` we open a `bash` shell to start and manage the strongSwan daemon in the `carol` container:
 
 ```console
 $ docker exec -ti carol /bin/bash
@@ -299,7 +299,7 @@ Tunnel1: IKEv2, reauthentication every 3420s, no rekeying
     id: carol.strongswan.org
   remote pre-shared key authentication:
     id: moon.strongswan.org
-  net-net: TUNNEL, rekeying every 1020s
+  Tunnel1: TUNNEL, rekeying every 1020s
     local:  10.3.0.0/16
     remote: 10.1.0.0/16
 ```
@@ -399,102 +399,142 @@ Tunnel1: #1, ESTABLISHED, IKEv2, 739acec0ff8f1f84_i* 5de2e8d07fa3cec2_r
 
 ## Rekeying of first CHILD SA <a name="section7"></a>
 
-The rekeying of the first 'CHILD_SA' takes place automatically after the `rekey_time` interval of `20` minutes.
+The rekeying of the first 'CHILD_SA' takes place automatically after the `lifetime` interval of `20` minutes.
+We can however force this update with the `swanctl --rekey --child Tunnel1` command.
+
+First, in order to capture the log of the rekey, we must open a new terminal window to monitor Carol's connection.
+We call this terminal window `terminal-carol-log`. To start the log, we use `swanctl --log`.
 ```console
-12[KNL] creating rekey job for CHILD_SA ESP/0xc98cde86/192.168.0.2
-10[IKE] establishing CHILD_SA net{3} reqid 1
-10[ENC] generating CREATE_CHILD_SA request 8 [ N(REKEY_SA) SA No KE TSi TSr ]
-10[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (288 bytes)
-08[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (288 bytes)
-08[ENC] parsed CREATE_CHILD_SA response 8 [ SA No KE TSi TSr N(ADD_KE) ]
+$ docker exec -ti moon /bin/bash
+$ swanctl --log
+```
+
+Now, back in `terminal-carol` we can initiate the rekey:
+```console
+carol# swanctl --rekey --child Tunnel1
+rekey completed successfully
+```
+In terminal window `terminal-carol-log` we now see the rekey:
+```console
+09[CFG] vici rekey CHILD_SA 'Tunnel1'
+14[IKE] establishing CHILD_SA Tunnel1{3} reqid 1
+14[ENC] generating CREATE_CHILD_SA request 6 [ N(REKEY_SA) SA No KE TSi TSr ]
+14[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (389 bytes)
+09[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (242 bytes)
+09[ENC] parsed CREATE_CHILD_SA response 6 [ SA No KE TSi TSr N(ADD_KE) ]
 ```
 ```console
-08[CFG] selected proposal: ESP:AES_GCM_16_256/CURVE_25519/NO_EXT_SEQ/KE1_KYBER_L3
+09[CFG] selected proposal: ESP:AES_GCM_16_256/CURVE_25519/NO_EXT_SEQ/KE1_KYBER_L3
+```
+The second KE for the Kyber key now takes place:
+```console
+09[ENC] generating IKE_FOLLOWUP_KE request 7 [ KE N(ADD_KE) ]
+09[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1258 bytes)
+06[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1153 bytes)
+06[ENC] parsed IKE_FOLLOWUP_KE response 7 [ KE ]
 ```
 ```console
-08[ENC] generating IKE_FOLLOWUP_KE request 9 [ KE N(ADD_KE) ]
-08[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1280 bytes)
-07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1184 bytes)
-07[ENC] parsed IKE_FOLLOWUP_KE response 9 [ KE N(ADD_KE) ]
-```
-```console
-07[ENC] generating IKE_FOLLOWUP_KE request 10 [ KE N(ADD_KE) ]
-07[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1024 bytes)
-15[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1024 bytes)
-15[ENC] parsed IKE_FOLLOWUP_KE response 10 [ KE N(ADD_KE) ]
-```
-```console
-15[ENC] generating IKE_FOLLOWUP_KE request 11 [ KE N(ADD_KE) ]
-15[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1088 bytes)
-11[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1168 bytes)
-11[ENC] parsed IKE_FOLLOWUP_KE response 11 [ KE ]
-```
-```console
-11[IKE] inbound CHILD_SA net{3} established with SPIs c2995173_i and TS 10.3.0.1/32 === 10.1.0.0/16
-11[IKE] outbound CHILD_SA net{3} established with SPIs c2995173_i c511ebe1_o and TS 10.3.0.1/32 === 10.1.0.0/16
+06[IKE] inbound CHILD_SA Tunnel1{3} established with SPIs c26b805c_i cf0b9b25_o and TS 10.3.0.0/16 === 10.1.0.0/16
+06[IKE] outbound CHILD_SA Tunnel1{3} established with SPIs c26b805c_i cf0b9b25_o and TS 10.3.0.0/16 === 10.1.0.0/16
 ```
 The new `CHILD_SA` has been established..
 ```console
-11[IKE] closing CHILD_SA net{1} with SPIs c41fa505_i (168 bytes) c98cde86_o (168 bytes) and TS 10.3.0.1/32 === 10.1.0.0/24
-11[IKE] sending DELETE for ESP CHILD_SA with SPI c41fa505
-11[ENC] generating INFORMATIONAL request 12 [ D ]
-11[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (80 bytes)
-05[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (80 bytes)
-05[ENC] parsed INFORMATIONAL response 12 [ D ]
-05[IKE] received DELETE for ESP CHILD_SA with SPI c98cde86
-05[IKE] CHILD_SA closed
+06[IKE] closing CHILD_SA Tunnel1{2} with SPIs c8c40c81_i (0 bytes) c2bbffb8_o (0 bytes) and TS 10.3.0.0/16 === 10.1.0.0/16
+06[IKE] sending DELETE for ESP CHILD_SA with SPI c8c40c81
+06[ENC] generating INFORMATIONAL request 8 [ D ]
+06[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (69 bytes)
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (69 bytes)
+07[ENC] parsed INFORMATIONAL response 8 [ D ]
+07[IKE] received DELETE for ESP CHILD_SA with SPI c2bbffb8
+07[IKE] CHILD_SA closed
 ```
 The old `CHILD_SA` has been deleted.
 
 ## Rekeying of IKE SA <a name="section9"></a>
 
 The rekeying of the first 'IKE_SA' takes place automatically after the `rekey_time` interval of `30` minutes.
+Again, however, we can force this rekey using the command `swanctl --rekey --ike Tunnel1`.
+
+In `terminal-carol` we eneter the command:
+
 ```console
-13[IKE] initiating IKE_SA home[2] to 192.168.0.2
-13[ENC] generating CREATE_CHILD_SA request 17 [ SA No KE ]
-13[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (224 bytes)
-11[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (240 bytes)
-11[ENC] parsed CREATE_CHILD_SA response 17 [ SA No KE N(ADD_KE) ]
+carol# swanctl --rekey --ike Tunnel1
+rekey completed successfully
+```
+
+In terminal window `terminal-carol-log` we now see the rekey:
+```console
+14[CFG] vici rekey IKE_SA 'Tunnel1'
+14[IKE] initiating IKE_SA Tunnel1[2] to 192.168.0.2
+14[ENC] generating CREATE_CHILD_SA request 3 [ SA No KE ]
+14[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (661 bytes)
+12[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (198 bytes)
+12[ENC] parsed CREATE_CHILD_SA response 3 [ SA No KE N(ADD_KE) ]
 ```
 ```console
-11[CFG] selected proposal: ESP:AES_GCM_16_256/CURVE_25519/NO_EXT_SEQ/KE1_KYBER_L3
+12[CFG] selected proposal: IKE:AES_GCM_16_256/PRF_HMAC_SHA2_512/CURVE_25519/KE1_KYBER_L3
 ```
+The second KE for the Kyber key now takes place:
 ```console
-11[ENC] generating IKE_FOLLOWUP_KE request 18 [ KE N(ADD_KE) ]
-07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1184 bytes)
-07[ENC] parsed IKE_FOLLOWUP_KE response 18 [ KE N(ADD_KE) ]
+12[ENC] generating IKE_FOLLOWUP_KE request 4 [ KE N(ADD_KE) ]
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1258 bytes)
+08[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1153 bytes)
+08[ENC] parsed IKE_FOLLOWUP_KE response 4 [ KE ]
 ```
+
 ```console
-07[ENC] generating IKE_FOLLOWUP_KE request 19 [ KE N(ADD_KE) ]
-07[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1024 bytes)
-08[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1024 bytes)
-08[ENC] parsed IKE_FOLLOWUP_KE response 19 [ KE N(ADD_KE) ]
-```
-```console
-08[ENC] generating IKE_FOLLOWUP_KE request 20 [ KE N(ADD_KE) ]
-08[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1088 bytes)
-05[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1168 bytes)
-05[ENC] parsed IKE_FOLLOWUP_KE response 20 [ KE ]
-```
-```console
-05[IKE] scheduling rekeying in 1694s
-05[IKE] maximum IKE_SA lifetime 1874s
-05[IKE] IKE_SA home[2] rekeyed between 192.168.0.3[carol@strongswan.org]...192.168.0.2[moon.strongswan.org]
+08[IKE] scheduling reauthentication in 3268s
+08[IKE] maximum IKE_SA lifetime 3448s
+08[IKE] IKE_SA Tunnel1[2] rekeyed between 192.168.0.3[carol.strongswan.org]...192.168.0.2[moon.strongswan.org]
 ```
 The new `IKE_SA` has been established.
 ```console
-05[IKE] deleting IKE_SA home[1] between 192.168.0.3[carol@strongswan.org]...192.168.0.2[moon.strongswan.org]
-05[IKE] sending DELETE for IKE_SA home[1]
-05[ENC] generating INFORMATIONAL request 21 [ D ]
-05[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (80 bytes)
-15[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (80 bytes)
-15[ENC] parsed INFORMATIONAL response 21 [ ]
-15[IKE] IKE_SA deleted
+08[IKE] deleting IKE_SA Tunnel1[1] between 192.168.0.3[carol.strongswan.org]...192.168.0.2[moon.strongswan.org]
+08[IKE] sending DELETE for IKE_SA Tunnel1[1]
+08[ENC] generating INFORMATIONAL request 5 [ D ]
+08[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (65 bytes)
+08[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (57 bytes)
+08[ENC] parsed INFORMATIONAL response 5 [ ]
+08[IKE] IKE_SA deleted
+
 ```
 The old `IKE_SA` has been deleted.
 
 ## SA Status after Rekeying <a name="section10"></a>
+If you're quick you can catch the deleted tunnel with a `swanctl --list-sas` command:
+```console
+carol# swanctl --list-sas
+Tunnel1: #3, ESTABLISHED, IKEv2, 769fedc951c1db8e_i* 7080ece2954ba603_r
+  local  'carol.strongswan.org' @ 192.168.0.3[4500]
+  remote 'moon.strongswan.org' @ 192.168.0.2[4500]
+  AES_GCM_16-256/PRF_HMAC_SHA2_512/CURVE_25519/KE1_KYBER_L3
+  established 14s ago, reauth in 2623s
+  Tunnel1: #1, reqid 1, DELETED, TUNNEL, ESP:AES_GCM_16-256
+    installed 518s ago, rekeying in 363s, expires in 682s
+    in  c6eacaae,    168 bytes,     2 packets,    20s ago
+    out cb43bc91,    168 bytes,     2 packets,    20s ago
+    local  10.3.0.0/16
+    remote 10.1.0.0/16
+  Tunnel1: #2, reqid 1, INSTALLED, TUNNEL, ESP:AES_GCM_16-256/CURVE_25519/KE1_KYBER_L3
+    installed 1s ago, rekeying in 883s, expires in 1199s
+    in  c74c941d,      0 bytes,     0 packets
+    out c9cb9458,      0 bytes,     0 packets
+    local  10.3.0.0/16
+    remote 10.1.0.0/16
+```
+Otherwise you will just see:
 
-TODO..waiting for it to happen again..
-
-
+```console
+carol# swanctl --list-sas
+Tunnel1: #3, ESTABLISHED, IKEv2, 769fedc951c1db8e_i* 7080ece2954ba603_r
+  local  'carol.strongswan.org' @ 192.168.0.3[4500]
+  remote 'moon.strongswan.org' @ 192.168.0.2[4500]
+  AES_GCM_16-256/PRF_HMAC_SHA2_512/CURVE_25519/KE1_KYBER_L3
+  established 31s ago, reauth in 2606s
+  Tunnel1: #2, reqid 1, INSTALLED, TUNNEL, ESP:AES_GCM_16-256/CURVE_25519/KE1_KYBER_L3
+    installed 18s ago, rekeying in 866s, expires in 1182s
+    in  c74c941d,      0 bytes,     0 packets
+    out c9cb9458,      0 bytes,     0 packets
+    local  10.3.0.0/16
+    remote 10.1.0.0/16
+```
