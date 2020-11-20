@@ -28,12 +28,10 @@ This package and guide is written for ubuntu. All testing was done on an EC2 ins
  2. [strongSwan Configuration](#section2)
  3. [Start up the IKEv2 Daemons](#section3)
  4. [Establish the IKE SA and first Child SA](#section4)
- 5. [Establish a second CHILD SA](#section5)
- 6. [Use the IPsec Tunnels](#section6)
- 7. [Rekeying of first CHILD SA](#section7)
- 8. [Rekeying of second CHILD SA](#section8)
- 9. [Rekeying of IKE SA](#section9)
-10. [SA Status after Rekeying](#section10)
+ 5. [Use the IPsec Tunnels](#section6)
+ 6. [Rekeying of first CHILD SA](#section7)
+ 7. [Rekeying of IKE SA](#section9)
+ 8. [SA Status after Rekeying](#section10)
 
 
 ## Docker Setup <a name="section1"></a>
