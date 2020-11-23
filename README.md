@@ -416,7 +416,7 @@ We can however force this update with the `swanctl --rekey --child Tunnel1` comm
 First, in order to capture the log of the rekey, we must open a new terminal window to monitor Carol's connection.
 We call this terminal window `terminal-carol-log`. To start the log, we use `swanctl --log`.
 ```console
-$ docker exec -ti moon /bin/bash
+$ docker exec -ti carol /bin/bash
 $ swanctl --log
 ```
 
