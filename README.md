@@ -33,6 +33,7 @@ This package and guide is written for ubuntu. All testing was done on an EC2 ins
  6. [Rekeying of first CHILD SA](#section7)
  7. [Rekeying of IKE SA](#section9)
  8. [SA Status after Rekeying](#section10)
+ 9. [Other PQ KEMs](#section11)
 
 
 ## Docker Setup <a name="section1"></a>
@@ -550,4 +551,224 @@ Tunnel1: #3, ESTABLISHED, IKEv2, 769fedc951c1db8e_i* 7080ece2954ba603_r
     out c9cb9458,      0 bytes,     0 packets
     local  10.3.0.0/16
     remote 10.1.0.0/16
+```
+## Other PQ KEMs <a name="section11"></a>
+We now list some other cipher suites to try.
+
+### Quadruple KE - ECDH, Kyber, NTRU, SABER.
+
+We can add the following connection configuration to Carol and Moon's `ipsec.conf` files to showcase four key exchanges ECDH, Kyber, NTRU, and SABER:
+
+Carol:
+```console
+conn Tunnel2
+        left=192.168.0.3
+        leftid=carol.strongswan.org
+        leftsubnet=10.3.0.1/16
+        #leftfirewall=yes
+        right=192.168.0.2
+        rightsubnet=10.1.0.0/16
+        rightid=moon.strongswan.org
+        auto=add
+        ike=aes256gcm16-sha512-x25519-ke1_kyber3-ke2_ntrup3-ke3_saber3!
+        esp=aes256gcm16-sha512-x25519-ke1_kyber3-ke2_ntrup3-ke3_saber3!
+```
+Moon:
+```console
+conn Tunnel2
+        left=192.168.0.2
+        leftsubnet=10.1.0.0/16
+        leftid=moon.strongswan.org
+        #leftfirewall=yes
+        right=192.168.0.3
+        rightsubnet=10.3.0.0/16
+        rightid=carol.strongswan.org
+        auto=add
+        ike=aes256gcm16-sha512-x25519-ke1_kyber3-ke2_ntrup3-ke3_saber3!
+        esp=aes256gcm16-sha512-x25519-ke1_kyber3-ke2_ntrup3-ke3_saber3!
+```
+(The `!` after the cipher suite enforces the use of this scheme and no others).
+
+Then `ipsec up Tunnel2` will produce the log:
+
+```console
+08[IKE] initiating IKE_SA Tunnel2[1] to 192.168.0.2
+08[ENC] generating IKE_SA_INIT request 0 [ SA KE No N(NATD_S_IP) N(NATD_D_IP) N(FRAG_SUP) N(HASH_ALG) N(REDIR_SUP) N(IKE_INT_SUP) V ]
+08[NET] sending packet: from 192.168.0.3[500] to 192.168.0.2[500] (284 bytes)
+10[NET] received packet: from 192.168.0.2[500] to 192.168.0.3[500] (292 bytes)
+10[ENC] parsed IKE_SA_INIT response 0 [ SA KE No N(NATD_S_IP) N(NATD_D_IP) N(FRAG_SUP) N(HASH_ALG) N(CHDLESS_SUP) N(IKE_INT_SUP) N(MULT_AUTH) V ]
+10[IKE] received strongSwan vendor ID
+10[CFG] selected proposal: IKE:AES_GCM_16_256/PRF_HMAC_SHA2_512/CURVE_25519/KE1_KYBER_L3/KE2_NTRU_HPS_L3/KE3_SABER_L3
+```
+Kyber KE:
+```console
+10[ENC] generating IKE_INTERMEDIATE request 1 [ KE ]
+10[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1249 bytes)
+15[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1153 bytes)
+15[ENC] parsed IKE_INTERMEDIATE response 1 [ KE ]
+```
+NTRU KE:
+```console
+15[ENC] generating IKE_INTERMEDIATE request 2 [ KE ]
+15[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (995 bytes)
+05[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (995 bytes)
+05[ENC] parsed IKE_INTERMEDIATE response 2 [ KE ]
+```
+SABER KE:
+```console
+05[ENC] generating IKE_INTERMEDIATE request 3 [ KE ]
+05[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1057 bytes)
+12[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1153 bytes)
+12[ENC] parsed IKE_INTERMEDIATE response 3 [ KE ]
+```
+```console
+12[IKE] authentication of 'carol.strongswan.org' (myself) with pre-shared key
+12[IKE] establishing CHILD_SA Tunnel2{1}
+12[ENC] generating IKE_AUTH request 4 [ IDi N(INIT_CONTACT) IDr AUTH SA TSi TSr N(MOBIKE_SUP) N(ADD_4_ADDR) N(MULT_AUTH) N(EAP_ONLY) N(MSG_ID_SYN_SUP) ]
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (320 bytes)
+05[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (272 bytes)
+05[ENC] parsed IKE_AUTH response 4 [ IDr AUTH SA TSi TSr N(AUTH_LFT) N(MOBIKE_SUP) N(ADD_4_ADDR) ]
+05[IKE] authentication of 'moon.strongswan.org' with pre-shared key successful
+05[IKE] IKE_SA Tunnel2[1] established between 192.168.0.3[carol.strongswan.org]...192.168.0.2[moon.strongswan.org]
+05[IKE] scheduling reauthentication in 3242s
+05[IKE] maximum IKE_SA lifetime 3422s
+05[CFG] selected proposal: ESP:AES_GCM_16_256/NO_EXT_SEQ
+05[IKE] CHILD_SA Tunnel2{1} established with SPIs cef9ea8c_i c39544a8_o and TS 10.3.0.0/16 === 10.1.0.0/16
+05[IKE] received AUTH_LIFETIME of 3320s, scheduling reauthentication in 3140s
+```
+
+### Triple Alternate KE - DH, Frodo, SIKE.
+
+We can add the following connection configuration to Carol and Moon's `ipsec.conf` files to showcase three key exchanges 3072bit DH, Frodo, and SIKE:
+Carol:
+```console
+conn Tunnel3
+        left=192.168.0.3
+        leftid=carol.strongswan.org
+        leftsubnet=10.3.0.1/16
+        #leftfirewall=yes
+        right=192.168.0.2
+        rightsubnet=10.1.0.0/16
+        rightid=moon.strongswan.org
+        auto=add
+        ike=aes256gcm16-sha512-modp3072-ke1_frodoa3-ke2_sike3!
+        esp=aes256gcm16-sha512-modp3072-ke1_frodoa3-ke2_sike3!
+```
+Moon:
+```console
+conn Tunnel3
+        left=192.168.0.2
+        leftsubnet=10.1.0.0/16
+        leftid=moon.strongswan.org
+        #leftfirewall=yes
+        right=192.168.0.3
+        rightsubnet=10.3.0.0/16
+        rightid=carol.strongswan.org
+        auto=add
+        ike=aes256gcm16-sha512-modp3072-ke1_frodoa3-ke2_sike3!
+        esp=aes256gcm16-sha512-modp3072-ke1_frodoa3-ke2_sike3!
+```
+These key exchanges are large, so we see fragmentation in action. We use `ipsec up Tunnel3` to bring up the connection. This will produce the log:
+```console
+08[CFG] received stroke: initiate 'Tunnel3'
+09[IKE] initiating IKE_SA Tunnel3[1] to 192.168.0.2
+09[ENC] generating IKE_SA_INIT request 0 [ SA KE No N(NATD_S_IP) N(NATD_D_IP) N(FRAG_SUP) N(HASH_ALG) N(REDIR_SUP) N(IKE_INT_SUP) V ]
+09[NET] sending packet: from 192.168.0.3[500] to 192.168.0.2[500] (628 bytes)
+12[NET] received packet: from 192.168.0.2[500] to 192.168.0.3[500] (636 bytes)
+12[ENC] parsed IKE_SA_INIT response 0 [ SA KE No N(NATD_S_IP) N(NATD_D_IP) N(FRAG_SUP) N(HASH_ALG) N(CHDLESS_SUP) N(IKE_INT_SUP) N(MULT_AUTH) V ]
+```
+The `KE` payload in the `IKE_SA_INIT` message exchange transports the public factors of the `3072 bit` prime Diffie-Hellman group.
+```console
+12[IKE] received strongSwan vendor ID
+12[CFG] selected proposal: IKE:AES_GCM_16_256/PRF_HMAC_SHA2_512/MODP_3072/KE1_FRODO_AES_L3/KE2_SIKE_L3
+12[ENC] generating IKE_INTERMEDIATE request 1 [ KE ]
+12[ENC] splitting IKE message (15697 bytes) into 12 fragments
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(1/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(2/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(3/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(4/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(5/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(6/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(7/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(8/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(9/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(10/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(11/12) ]
+12[ENC] generating IKE_INTERMEDIATE request 1 [ EF(12/12) ]
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (1448 bytes)
+12[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (444 bytes)
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+```
+The large `FrodoKEM` public key sent by the initiator via the `IKE_INTERMEDIATE` message has to be split into 12 IKEv2 fragments.
+```console
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(1/12) ]
+07[ENC] received fragment #1 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(2/12) ]
+07[ENC] received fragment #2 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(3/12) ]
+07[ENC] received fragment #3 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(4/12) ]
+07[ENC] received fragment #4 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(9/12) ]
+07[ENC] received fragment #9 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(10/12) ]
+07[ENC] received fragment #10 of 12, waiting for complete IKE message
+07[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+07[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(11/12) ]
+07[ENC] received fragment #11 of 12, waiting for complete IKE message
+05[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+05[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(8/12) ]
+05[ENC] received fragment #8 of 12, waiting for complete IKE message
+10[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+10[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(5/12) ]
+10[ENC] received fragment #5 of 12, waiting for complete IKE message
+14[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+14[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(6/12) ]
+14[ENC] received fragment #6 of 12, waiting for complete IKE message
+09[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (1448 bytes)
+09[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(7/12) ]
+11[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (556 bytes)
+11[ENC] parsed IKE_INTERMEDIATE response 1 [ EF(12/12) ]
+11[ENC] received fragment #12 of 12, reassembled fragmented IKE message (15809 bytes)
+11[ENC] parsed IKE_INTERMEDIATE response 1 [ KE ]
+09[ENC] received fragment #7 of 12, waiting for complete IKE message
+```
+The encrypted session secret sent by the responder has to be fragmented into 12 parts as well.  The `FRODOKEM` key exchange defined as `ADDITIONAL_KEY_EXCHANGE_1` has been completed.
+We then see the SIKE KEM:
+```console
+11[ENC] generating IKE_INTERMEDIATE request 2 [ KE ]
+11[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (527 bytes)
+10[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (551 bytes)
+10[ENC] parsed IKE_INTERMEDIATE response 2 [ KE ]
+```
+```console
+10[IKE] authentication of 'carol.strongswan.org' (myself) with pre-shared key
+10[IKE] establishing CHILD_SA Tunnel3{1}
+10[ENC] generating IKE_AUTH request 3 [ IDi N(INIT_CONTACT) IDr AUTH SA TSi TSr N(MOBIKE_SUP) N(ADD_4_ADDR) N(MULT_AUTH) N(EAP_ONLY) N(MSG_ID_SYN_SUP) ]
+10[NET] sending packet: from 192.168.0.3[4500] to 192.168.0.2[4500] (320 bytes)
+11[NET] received packet: from 192.168.0.2[4500] to 192.168.0.3[4500] (272 bytes)
+11[ENC] parsed IKE_AUTH response 3 [ IDr AUTH SA TSi TSr N(AUTH_LFT) N(MOBIKE_SUP) N(ADD_4_ADDR) ]
+11[IKE] authentication of 'moon.strongswan.org' with pre-shared key successful
+11[IKE] IKE_SA Tunnel3[1] established between 192.168.0.3[carol.strongswan.org]...192.168.0.2[moon.strongswan.org]
+11[IKE] scheduling reauthentication in 3328s
+11[IKE] maximum IKE_SA lifetime 3508s
+11[CFG] selected proposal: ESP:AES_GCM_16_256/NO_EXT_SEQ
+11[IKE] CHILD_SA Tunnel3{1} established with SPIs ca8cf552_i c801c1e0_o and TS 10.3.0.0/16 === 10.1.0.0/16
+11[IKE] received AUTH_LIFETIME of 3246s, scheduling reauthentication in 3066s
+11[IKE] peer supports MOBIKE
 ```
