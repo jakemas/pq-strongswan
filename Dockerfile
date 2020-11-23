@@ -25,7 +25,7 @@ RUN \
   tar xfj strongswan-$VERSION.tar.bz2 && \
   cd strongswan-$VERSION && \
   ./configure --prefix=/usr --sysconfdir=/etc      \
-    --enable-oqs --enable-gcm --enable-ntru && \
+    --enable-oqs --enable-gcm --enable-ntru --enable-frodo && \
    make all && make install && \
    cd / && rm -R strongswan-build && \
    ln -s /usr/libexec/ipsec/charon charon && \
