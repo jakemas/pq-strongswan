@@ -97,7 +97,7 @@ $ git clone https://github.com/jakemas/pq-strongswan.git
 
 ```console
 $ cd pq-strongswan
-$ docker build --tag pq-strongswan:6.0dr2 .
+$ docker build --tag pq-strongswan:6.0dr3 .
 ```
 
 (TODO: build this on dockerhub and just let it be a download - this will reduce build time)

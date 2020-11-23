@@ -2,7 +2,7 @@ version: "3"
 
 services:
   moon:
-    image: pq-strongswan:6.0dr2
+    image: pq-strongswan:6.0dr3
     container_name: moon
     cap_add:
       - NET_ADMIN

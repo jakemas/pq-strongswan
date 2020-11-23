@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 MAINTAINER Jake Massimo <jakemas@amazon.com>
-ENV VERSION="6.0dr2"
+ENV VERSION="6.0dr3"
 
 RUN \
   # install packages
