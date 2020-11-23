@@ -101,7 +101,7 @@ $ git clone https://github.com/jakemas/pq-strongswan.git
 $ cd pq-strongswan
 $ docker build --tag pq-strongswan:6.0dr3 .
 ```
-> **_NOTE:_**  docker and VPN commands require `sudo` permissions. You may need to prepend `sudo` to the command `docker build --tag pq-strongswan:6.0dr3 .` and other following commands. Alternatively, you may run `sudo su`.
+> **_NOTE:_**  docker and IPSec commands require `sudo` permissions. You may need to prepend `sudo` to the command `docker build --tag pq-strongswan:6.0dr3 .` and other following commands. Alternatively, you may run `sudo su`.
 
 This may take a few minutes (perhaps make yourself a cup of tea). The Docker image is installing liboqs and strongswan, which can take some time. This build only needs to be done once. When complete, the configuration files of the VPN can be modified and changed without the need of this lengthy step. This step can be moved to dockerhub, so that the built image can simply be downloaded and this build can be avoided, however I am not familiar with how to do this privately, so for now we build it ourselves.
 
