@@ -201,6 +201,7 @@ conn Tunnel1
         rightid=moon.strongswan.org
         auto=add
 ```
+> **_NOTE:_**  you may see other connections appear in this list, such as `Tunnel2` and `Tunnel3`. Ignore these for now, these are additional tunnels we create with different cipher suites, and will be discussed later in the section: [Other PQ KEMs](#section11).
 
 The child security association `Tunnel1` is defined. It connects the client with the IP address of the gateway `192.168.0.2`. We choose to use 
 `aes256gcm16-sha512-x25519-ke1_kyber3` as our cipher suite. A full list of cipher suites and keywords for their use can be found at [strongSwan IKEv2 Cipher Suites][IKEV2-CS]. The choice `aes256gcm16-sha512-x25519-ke1_kyber3`uses:
@@ -325,6 +326,8 @@ Tunnel1: IKEv2, reauthentication every 3420s, no rekeying
     local:  10.3.0.0/16
     remote: 10.1.0.0/16
 ```
+> **_NOTE:_**  you may see other connections appear in this list, such as `Tunnel2` and `Tunnel3`. Ignore these for now, these are additional tunnels we create with different cipher suites, and will be discussed later in the section: [Other PQ KEMs](#section11).
+
 ## Establish the IKE SA and first Child SA <a name="section4"></a>
 
 For IKEv2, the Security Association (SA) that carries IKE messages is referred to as the IKE SA, and the SAs for the Encapsulating Security Payload (ESP) and Authentication Header (AH) are child SAs. We do this using `ipsec up Tunnel1`, however this can also be done using `swanctl --initiate --child Tunnel1`.
