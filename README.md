@@ -104,7 +104,7 @@ $ docker build --tag pq-strongswan:6.0dr3 .
 
 ### Create Docker Containers and Local Networks
 
-We now use `docker-compose` to bring the `moon` and `carol` docker containers up:
+We first create empty directories in Carol and Moon using the command `sh scripts/gen_dirs.sh` to execute `gen_dirs/sh`. These directories are added to better emulate real users and prevent warnings and errors produced by the IKEv2 daemon when starting up the connection. We use `docker-compose` to bring the `moon` and `carol` docker containers up:
 
 ```console
 $ sh scripts/gen_dirs.sh
@@ -113,7 +113,7 @@ Creating moon ... done
 Creating carol ... done
 Attaching to moon, carol
 ```
-As we will have multiple terminal windows open for each client, we shall refer to this window as `terminal-monitor`.
+As we will have multiple terminal windows open for each client, we shall refer to this window as `terminal-monitor`. We keep this terminal window open, as we will come back to it shortly.
 
 The network topology that has been created looks as follows:
 ```
