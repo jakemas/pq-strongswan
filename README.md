@@ -240,7 +240,7 @@ In an additional console window we refer to as `terminal-moon` we open a `bash` 
 ```console
 $ docker exec -ti moon /bin/bash
 $ ipsec start
-Starting strongSwan 6.0dr2 IPsec [starter]...
+Starting strongSwan 6.0dr3 IPsec [starter]...
 ```
 Back in the terminal from which we started the docker image `terminal-monitor`, we now see an update:
 
@@ -248,7 +248,7 @@ Back in the terminal from which we started the docker image `terminal-monitor`, 
 Starting moon ... done
 Starting carol ... done
 Attaching to moon, carol
-moon     | bash-5.0# ipsec_starter[12]: Starting strongSwan 6.0dr2 IPsec [starter]...
+moon     | bash-5.0# ipsec_starter[12]: Starting strongSwan 6.0dr3 IPsec [starter]...
 moon     | 
 moon     | ipsec_starter[15]: charon (16) started after 20 ms
 moon     | 
@@ -261,7 +261,7 @@ In an additional console window we refer to as `terminal-carol` we open a `bash`
 ```console
 $ docker exec -ti carol /bin/bash
 $ ipsec start
-Starting strongSwan 6.0dr2 IPsec [starter]...
+Starting strongSwan 6.0dr3 IPsec [starter]...
 ```
 Back in the terminal from which we started the docker image `terminal-monitor`, we now see a second update:
 
@@ -269,11 +269,11 @@ Back in the terminal from which we started the docker image `terminal-monitor`, 
 Starting moon ... done
 Starting carol ... done
 Attaching to moon, carol
-moon     | bash-5.0# ipsec_starter[12]: Starting strongSwan 6.0dr2 IPsec [starter]...
+moon     | bash-5.0# ipsec_starter[12]: Starting strongSwan 6.0dr3 IPsec [starter]...
 moon     | 
 moon     | ipsec_starter[15]: charon (16) started after 20 ms
 moon     | 
-carol    | bash-5.0# ipsec_starter[14]: Starting strongSwan 6.0dr2 IPsec [starter]...
+carol    | bash-5.0# ipsec_starter[14]: Starting strongSwan 6.0dr3 IPsec [starter]...
 carol    | 
 carol    | ipsec_starter[17]: charon (18) started after 20 ms
 carol    | 
@@ -282,7 +282,7 @@ We can see the status of the connection with `ipsec status`
 
 ```console
 carol# ipsec statusall
-Status of IKE charon daemon (strongSwan 6.0dr2, Linux 5.4.0-1029-aws, x86_64):
+Status of IKE charon daemon (strongSwan 6.0dr3, Linux 5.4.0-1029-aws, x86_64):
   uptime: 99 seconds, since Nov 19 12:59:35 2020
   malloc: sbrk 1351680, mmap 0, used 333888, free 1017792
   worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 0
