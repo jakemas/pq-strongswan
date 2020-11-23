@@ -183,7 +183,6 @@ conn Tunnel1
         left=192.168.0.3
         leftid=carol.strongswan.org
         leftsubnet=10.3.0.1/16
-        leftfirewall=yes
         right=192.168.0.2
         rightsubnet=10.1.0.0/16
         rightid=moon.strongswan.org
@@ -226,7 +225,6 @@ conn Tunnel1
         left=192.168.0.2
         leftsubnet=10.1.0.0/16
         leftid=moon.strongswan.org
-        leftfirewall=yes
         right=192.168.0.3
         rightsubnet=10.3.0.0/16
         rightid=carol.strongswan.org
@@ -352,21 +350,13 @@ The `KYBER_L3` key exchange defined as `ADDITIONAL_KEY_EXCHANGE_1`has been compl
 [NET] received packet: from 192.168.0.2[500] to 192.168.0.3[500] (237 bytes)
 [ENC] parsed IKE_AUTH response 2 [ IDr AUTH SA TSi TSr N(AUTH_LFT) ]
 [IKE] authentication of '192.168.0.2' with pre-shared key successful
-[IKE] IKE_SA Tunnel1[1] established between 192.168.0.3[192.168.0.3]...192.168.0.2[192.168.0.2]
+[IKE] IKE_SA Tunnel1[1] established between 192.168.0.3[carol.strongswan.org]...192.168.0.2[moon.strongswan.org]
 [IKE] scheduling reauthentication in 3268s
 [IKE] maximum IKE_SA lifetime 3448s
 [CFG] selected proposal: ESP:AES_GCM_16_256/NO_EXT_SEQ
 [IKE] CHILD_SA Tunnel1{1} established with SPIs cb7bdaa5_i c9c43a36_o and TS 10.3.0.0/16 === 10.1.0.0/16
-[CHD] updown: /usr/libexec/ipsec/_updown: 310: iptables: not found
-[CHD] updown: /usr/libexec/ipsec/_updown: 313: iptables: not found
 [IKE] received AUTH_LIFETIME of 3377s, scheduling reauthentication in 3197s
 initiate completed successfully
-```
-TODO:
-fix this:
-```console
-[CHD] updown: /usr/libexec/ipsec/_updown: 310: iptables: not found
-[CHD] updown: /usr/libexec/ipsec/_updown: 313: iptables: not found
 ```
 
 ## Use the IPsec Tunnels <a name="section6"></a>
