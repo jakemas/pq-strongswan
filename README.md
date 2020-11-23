@@ -2,8 +2,8 @@
 
 Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Docker image. The current prototype implementation is based on the two following IETF Internet Drafts:
 
-* [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE]: Multiple Key Exchanges in IKEv2
-* [draft-ietf-ipsecme-ikev2-intermediate][IKEV2_INTERMEDIATE]: Intermediate Exchange in the IKEv2 Protocol
+* [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE]: Multiple Key Exchanges in IKEv2. This draft describes how to extend the Internet Key Exchange Protocol Version 2 (IKEv2) to allow multiple key exchanges to take place while computing a shared secret during a Security Association (SA) setup.
+* [draft-ietf-ipsecme-ikev2-intermediate][IKEV2_INTERMEDIATE]: Intermediate Exchange in the IKEv2 Protocol. This draft defines a new exchange, called Intermediate Exchange, for IKEv2. This exchange can be used for transferring large amount of data in the process of IKEv2 SA establishment. These intermediate messages are used by ietf-ipsecme-ikev2-multiple-ke to perform the multiple key exchanges.
 
 ## Branches
 There are two branches in this repo, they both represent different network architecture:
