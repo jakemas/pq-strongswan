@@ -99,8 +99,7 @@ $ git clone https://github.com/jakemas/pq-strongswan.git
 $ cd pq-strongswan
 $ docker build --tag pq-strongswan:6.0dr3 .
 ```
-
-(TODO: build this on dockerhub and just let it be a download - this will reduce build time)
+This may take a few minutes (perhaps make yourself a cup of tea). The Docker image is installing liboqs and strongswan, which can take some time. This build only needs to be done once. When complete, the configuration files of the VPN can be modified and changed without the need of this lengthy step. This step can be moved to dockerhub, so that the built image can simply be downloaded and this build can be avoided, however I am not familiar with how to do this privately, so for now we build it ourselves.
 
 ### Create Docker Containers and Local Networks
 
@@ -161,6 +160,18 @@ charon {
 The KEM algorithms listed above are implemented by the strongSwan `oqs` plugin which in turn uses the  [liboqs][LIBOQS]  Open Quantum-Safe library. There is also a `frodo` plugin which implements the `FrodoKEM` algorithm with strongSwan crypto primitives. There is currently no support for the `BIKE` and  `HQC` alternate KEM candidates. `Classic McEliece` , although being a NIST round 3 submission KEM candidate, is not an option for IKE due to the huge public key size of more than 100 kB.
 
 [LIBOQS]: https://github.com/open-quantum-safe/liboqs
+
+### VPN Configuration
+
+In order to establish a VPN between Carol and Moon, both must set up the VPN through configuration files. The three files needed on both Carol and Moon are `ipsec.conf`, `ipsec.secrets` and `strongswan.conf`.
+
+-  `ipsec.conf`: this file defines general configuration parameters and defines connections. The general configuration options are set in the `conn %default` section, these are values such as the key exchange mechanism (e.g., IKEv1 or IKEv2), the key life time and rekeying cadence, authentication types, and cipher suite options. Individual connections, such as ` conn Tunnel1` define more specific parameters, such as the IP addresses, IDs and subnets being used for the connection. All `conn` sections inherit the parameters defined in the `conn %default` section.
+
+-  `ipsec.secrets`: this file contains cryptographic secrets, such as RSA, ECSDA, EAP or PSKs. In our case, the PSK used for authentication is stored within this file, with the respective ID selectors for both Carol and Moon.
+
+-  `strongswan.conf`: this file contains configuration options for strongSwan. It can be used to automatically load and start connections, as well as set debug/logging options. In our case we use this file to modify the size of the IP fragments and the maximum IKEv2 packet size.
+
+We give example `ipsec.conf`, `ipsec.secrets` and `strongswan.conf` that utilize hybrid post-quantum key exchange for this prototype. These three files can be modified to build/test various connections – the desired use of this repository is to provide such a framework to allow this, without the need to worry about networking issues. The three configuration files are found in `/carol/` and `/moon/` directories. When the docker image is brought up, these three files are placed on the image container for both Carol and Moon respectively -- by the configuration set within the `docker-compose.yml` file.
 
 ### VPN Client Configuration
 
