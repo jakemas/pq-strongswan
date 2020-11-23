@@ -190,7 +190,20 @@ conn Tunnel1
         auto=add
 ```
 
-The child security association `Tunnel1` is defined. It connects the client with the IP address of the gateway `192.168.0.2`.
+The child security association `Tunnel1` is defined. It connects the client with the IP address of the gateway `192.168.0.2`. We choose to use 
+`aes256gcm16-sha512-x25519-ke1_kyber3` as our cipher suite. A full list of cipher suites and keywords for their use can be found at [strongSwan IKEv2 Cipher Suites][IKEV2-CS]. The choice `aes256gcm16-sha512-x25519-ke1_kyber3`uses:
+- Encryption Algorithm `aes256gcm16`: 256 bit AES-CCM with 128 bit ICV.
+- Integrity Algorithm `sha512`: SHA2_512_256 HMAC.
+- Key Exchange Algorithm `x25519`: Elliptic Curve Diffie-Hellman with 256 bit Elliptic Curve25519.
+- Key Exchange Algorithm `ke1_kyber3`: Kyber Level 3 (At least as hard to break as AES192 - 96 bit quantum security).
+
+Other NIST round 3 submission candidates can be tested, using their respective keyword from the table provided above. The [draft-ietf-ipsecme-ikev2-multiple-ke][IKEV2_MULTIPLE_KE] also facilitates the use of more than two key exchanges, for example:
+```console
+aes256gcm16-sha512-x25519-ke1_kyber3-ke2_ntrup3-ke3_saber3
+```
+will negotiate a *hybrid* key exchange that will use `X25519` elliptic curve for the initial exchange, followed by three rounds of post-quantum key exchanges consisting of the `Kyber`, `NTRU` and `Saber` algorithms, all of them on NIST security level 3. 
+
+[IKEV2-CS]:https://wiki.strongswan.org/projects/strongswan/wiki/IKEv2CipherSuites
 
 ### VPN Gateway Configuration
 
