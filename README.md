@@ -39,7 +39,7 @@ This package and guide is written for ubuntu. All testing was done on an EC2 ins
 
 ### Install Docker
 
-See Docker installation guide https://docs.docker.com/engine/install/ubuntu/.
+Instructions from Docker installation guide https://docs.docker.com/engine/install/ubuntu/:
 
 Update the apt package index and install packages to allow apt to use a repository over HTTPS:
 
@@ -76,7 +76,7 @@ $ sudo apt-get install docker-ce docker-ce-cli containerd.io
 
 ### Install docker-compose
 
-See docker-compose installation guide https://docs.docker.com/compose/install/.
+Instructions from docker-compose installation guide https://docs.docker.com/compose/install/:
 
 Download the current stable release of Docker Compose:
 
