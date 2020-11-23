@@ -18,7 +18,7 @@ services:
       intranet_moon:
          ipv4_address: 10.1.0.2
   carol:
-    image: pq-strongswan:6.0dr2
+    image: pq-strongswan:6.0dr3
     container_name: carol
     depends_on:
       - moon
