@@ -7,7 +7,7 @@ Build and run a [strongSwan][STRONGSWAN] 6.0dr Post-Quantum IKEv2 Daemon in a Do
 
 ## Branches
 There are two branches in this repo, they both represent different network architecture:
-- The `site-to-site` (and thus also `main`) branch represents a site-to-site VPN connection. A site-to-site VPN is a connection between two or more networks, such as a corporate network and a branch office network. 
+- The `site-to-site` (and thus also `main`) branch represents a site-to-site VPN connection. A site-to-site VPN is a connection between two or more networks, such as a corporate network and a branch office network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [net2net-psk][NET2NET-PSK]. We default `main` to this type of connection, as it most closely replicates that of the site-to-site connection in AWS VPN.
 - The `road-warrior` branch represents a Road Warrior - VPN gateway connection. Road Warriors are remote users who want to connect to a network. This example is a combination of the [docker image built to showcase PQ strongSwan][PQ-STRONGSWAN] by Andreas Steffen, and the strongSwan configuration example [rw-ntru-psk][RW-NTRU-PSK].
 
 There is more detail in this readme about the particular network configuration of the branch.
@@ -17,6 +17,7 @@ There is more detail in this readme about the particular network configuration o
 [IKEV2_INTERMEDIATE]:https://tools.ietf.org/html/draft-ietf-ipsecme-ikev2-intermediate
 [PQ-STRONGSWAN]:https://github.com/strongX509/docker/tree/master/pq-strongswan
 [RW-NTRU-PSK]:https://github.com/strongswan/strongswan/tree/master/testing/tests/ikev2/rw-ntru-psk
+[NET2NET-PSK]:https://github.com/strongswan/strongswan/tree/master/testing/tests/ikev2/net2net-psk
 
 ## Prerequisites <a name="section0"></a>
 
